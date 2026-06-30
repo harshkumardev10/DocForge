@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocForge — Invoice & Resume Templates</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f0f4f8;color:#1e293b}
+.navbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:60px;display:flex;align-items:center;gap:10px}
+.nav-logo-text{font-size:20px;font-weight:700;color:#1a56db}
+.hero{padding:48px 24px 24px;text-align:center}
+.hero h1{font-size:30px;font-weight:800;margin-bottom:8px}
+.hero p{color:#64748b;font-size:14px}
+.section{max-width:1100px;margin:0 auto;padding:24px}
+.section-title{font-size:13px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #e2e8f0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:36px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.08)}
+.card-swatch{height:90px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;letter-spacing:1px}
+.card-body{padding:14px 16px}
+.card-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.card-desc{font-size:12px;color:#64748b;line-height:1.5;margin-bottom:8px}
+.card-link{font-size:11px;color:#1a56db;font-family:monospace;background:#eff6ff;padding:3px 8px;border-radius:5px;display:inline-block}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <span class="nav-logo-text">📄 DocForge</span>
+</nav>
+
+<div class="hero">
+  <h1>Invoice & Resume Templates</h1>
+  <p>Pick a style below, or link directly with a URL parameter — same editor, same export tools, different look.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Invoices — invoice.html?type=...</div>
+  <div class="grid">
+    <a class="card" href="invoice.html?type=classic">
+      <div class="card-swatch" style="background:#1a56db">CLASSIC</div>
+      <div class="card-body">
+        <div class="card-name">Classic Invoice</div>
+        <div class="card-desc">Bold blue header, full Bill/Ship To and shipping bar. Best general-purpose layout.</div>
+        <span class="card-link">?type=classic</span>
+      </div>
+    </a>
+    <a class="card" href="invoice.html?type=modern">
+      <div class="card-swatch" style="background:#0f172a">MODERN</div>
+      <div class="card-body">
+        <div class="card-name">Modern Invoice</div>
+        <div class="card-desc">Dark slate header with a teal accent and Poppins typography for a contemporary brand feel.</div>
+        <span class="card-link">?type=modern</span>
+      </div>
+    </a>
+    <a class="card" href="invoice.html?type=minimal">
+      <div class="card-swatch" style="background:#111827">MINIMAL</div>
+      <div class="card-body">
+        <div class="card-name">Minimal Invoice</div>
+        <div class="card-desc">Black & white, thin rules, no color blocks — clean and print-friendly.</div>
+        <span class="card-link">?type=minimal</span>
+      </div>
+    </a>
+    <a class="card" href="invoice.html?type=service">
+      <div class="card-swatch" style="background:#7c3aed">SERVICE</div>
+      <div class="card-body">
+        <div class="card-name">Service Invoice</div>
+        <div class="card-desc">Violet theme tuned for billing services — "Rate" column and service-rendered framing.</div>
+        <span class="card-link">?type=service</span>
+      </div>
+    </a>
+    <a class="card" href="invoice.html?type=freelancer">
+      <div class="card-swatch" style="background:#15803d">FREELANCE</div>
+      <div class="card-body">
+        <div class="card-name">Freelancer Invoice</div>
+        <div class="card-desc">Green accent, simplified single Bill-To (no Ship To/shipping bar) for solo freelance work.</div>
+        <span class="card-link">?type=freelancer</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="section-title">Resumes — resume.html?theme=...</div>
+  <div class="grid">
+    <a class="card" href="resume.html?theme=classic">
+      <div class="card-swatch" style="background:#1a56db">CLASSIC</div>
+      <div class="card-body">
+        <div class="card-name">Classic Resume</div>
+        <div class="card-desc">Single-column with a blue header band — clean and ATS-friendly.</div>
+        <span class="card-link">?theme=classic</span>
+      </div>
+    </a>
+    <a class="card" href="resume.html?theme=modern">
+      <div class="card-swatch" style="background:#1a56db">MODERN</div>
+      <div class="card-body">
+        <div class="card-name">Modern Resume</div>
+        <div class="card-desc">Two-column sidebar layout with skills & education on a colored side panel.</div>
+        <span class="card-link">?theme=modern</span>
+      </div>
+    </a>
+    <a class="card" href="resume.html?theme=minimal">
+      <div class="card-swatch" style="background:#111827">MINIMAL</div>
+      <div class="card-body">
+        <div class="card-name">Minimal Resume</div>
+        <div class="card-desc">Serif typography, black & white, no color — understated and professional.</div>
+        <span class="card-link">?theme=minimal</span>
+      </div>
+    </a>
+    <a class="card" href="resume.html?theme=ats">
+      <div class="card-swatch" style="background:#000000">ATS-FRIENDLY</div>
+      <div class="card-body">
+        <div class="card-name">ATS-Friendly Resume</div>
+        <div class="card-desc">Plain black & white, single column, centered header — built to pass resume-screening software. Includes a built-in ATS score checker.</div>
+        <span class="card-link">?theme=ats</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
