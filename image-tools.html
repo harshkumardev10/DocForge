@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Edit images online for free with DocForge Image Tools. Automatically remove backgrounds, enhance quality, adjust brightness, contrast, colors, and crop or rotate images in your browser.">
+<meta name="keywords" content="image editor, background remover, quality enhancer, sharpen image, adjust brightness, photo editor, free online crop image">
+<title>DocForge — Image Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  color-scheme:light;
+  --bg-page:#f0f4f8;
+  --bg-surface:#ffffff;
+  --bg-swatch-tint:#eff6ff;
+  --text-primary:#1e293b;
+  --text-muted:#64748b;
+  --text-faint:#6b7280;
+  --border-color:#e2e8f0;
+  --accent:#1a56db;
+  --accent-hover:#154bc4;
+  --shadow-color:rgba(0,0,0,.08);
+  --overlay-hover:rgba(0,0,0,.03);
+  --input-bg:#ffffff;
+  --success:#15803d;
+  --success-bg:#f0fdf4;
+  --error:#dc2626;
+  --error-bg:#fef2f2;
+}
+[data-theme="dark"]{
+  color-scheme:dark;
+  --bg-page:#0b1120;
+  --bg-surface:#111827;
+  --bg-swatch-tint:#0f1e3d;
+  --text-primary:#e5e7eb;
+  --text-muted:#94a3b8;
+  --text-faint:#9ca3af;
+  --border-color:#293244;
+  --accent:#5b8def;
+  --accent-hover:#7ba1f2;
+  --shadow-color:rgba(0,0,0,.5);
+  --overlay-hover:rgba(255,255,255,.04);
+  --input-bg:#0f172a;
+  --success:#4ade80;
+  --success-bg:#0f2417;
+  --error:#f87171;
+  --error-bg:#2a1414;
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg-page);color:var(--text-primary);padding-top:60px;transition:background-color .25s ease,color .25s ease}
+
+/* ===== Navbar ===== */
+.navbar{background:var(--bg-surface);border-bottom:1px solid var(--border-color);padding:0 16px;height:60px;display:flex;align-items:center;gap:14px;position:fixed;top:0;left:0;width:100%;z-index:1000}
+.nav-left{display:flex;align-items:center;gap:6px}
+.icon-btn{background:none;border:1px solid var(--border-color);color:var(--text-primary);width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .2s ease,transform .15s ease;flex-shrink:0}
+.icon-btn:hover{background:var(--overlay-hover);transform:translateY(-1px)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;cursor:pointer}
+.nav-logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1a56db 0%,#3b82f6 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(26,86,219,.3)}
+.nav-logo-words{display:flex;align-items:baseline}
+.nav-logo-words .wm-doc{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:-0.5px;line-height:1}
+.nav-logo-words .wm-forge{font-size:18px;font-weight:400;color:var(--text-muted);letter-spacing:-0.3px;line-height:1}
+.nav-crumb{font-size:13px;color:var(--text-muted);margin-left:2px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+.wrap{max-width:1160px;margin:0 auto;padding:28px 20px 60px}
+.page-head{margin-bottom:20px}
+.page-head h1{font-size:26px;font-weight:800}
+.page-head p{color:var(--text-muted);font-size:14px;margin-top:4px}
+
+/* ===== Grid Pickers ===== */
+.tool-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.chip{border:1px solid var(--border-color);background:var(--bg-surface);color:var(--text-muted);font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:20px;cursor:pointer;transition:all .15s ease;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.chip:hover{color:var(--text-primary);border-color:var(--accent)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ===== Workspace Layout ===== */
+.editor-layout{display:flex;gap:24px;align-items:stretch}
+.control-sidebar{width:340px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:16px;padding:22px;flex-shrink:0;display:flex;flex-direction:column;gap:20px}
+.preview-area{flex:1;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:500px;position:relative}
+
+@media(max-width:900px){
+  .editor-layout{flex-direction:column}
+  .control-sidebar{width:100%}
+}
+
+/* ===== Dropzone ===== */
+.dropzone{border:2px dashed var(--border-color);border-radius:12px;padding:60px 20px;text-align:center;cursor:pointer;transition:border-color .15s ease,background-color .15s ease;width:100%;max-width:550px}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);background:var(--bg-swatch-tint)}
+.dropzone svg{color:var(--text-faint);margin-bottom:12px}
+.dropzone .dz-main{font-size:14px;font-weight:600}
+.dropzone .dz-sub{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+/* ===== Canvas View & Checkered Background ===== */
+.canvas-container{position:relative;max-width:100%;max-height:600px;overflow:auto;border-radius:8px;border:1px solid var(--border-color);background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);background-size: 16px 16px;background-position: 0 0, 0 8px, 8px -8px, -8px 0px}
+[data-theme="dark"] .canvas-container{background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%)}
+.canvas-container canvas{display:block;margin:0 auto;max-width:100%;height:auto}
+
+/* ===== Controls ===== */
+.section-label{font-size:12px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.control-group{display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;color:var(--text-primary)}
+.field label span:last-child{color:var(--accent);font-family:monospace}
+.field input[type=range]{width:100%;accent-color:var(--accent)}
+
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:11px 22px;border-radius:10px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:background-color .15s ease;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:var(--bg-swatch-tint);color:var(--accent);border:1px solid var(--border-color);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease}
+.btn-secondary:hover{background:var(--accent);color:#fff}
+
+.preset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.preset-btn{background:var(--bg-page);border:1px solid var(--border-color);border-radius:8px;padding:8px 4px;font-size:11.5px;font-weight:600;color:var(--text-primary);cursor:pointer;text-align:center;transition:all .15s ease}
+.preset-btn:hover,.preset-btn.active{border-color:var(--accent);background:var(--bg-swatch-tint);color:var(--accent)}
+
+/* Color picker / key color selection */
+.color-picker-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.color-swatch-picker{width:36px;height:36px;border-radius:8px;border:1px solid var(--border-color);padding:0;cursor:pointer;background:none}
+
+/* Crop box overlay */
+.crop-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+
+/* ===== Drawer & Sidebar Menu ===== */
+.menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:1000}
+.menu-overlay.open{opacity:1;pointer-events:auto}
+.menu-drawer{position:fixed;top:0;left:-320px;width:300px;height:100%;background:var(--bg-surface);border-right:1px solid var(--border-color);display:flex;flex-direction:column;transition:left .3s cubic-bezier(0.4, 0, 0.2, 1);z-index:1001;box-shadow: 4px 0 24px var(--shadow-color);padding:24px 16px;overflow-y:auto}
+.menu-drawer.open{left:0}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border-color)}
+.drawer-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.drawer-logo-words{display:flex;align-items:baseline}
+.drawer-logo-words .wm-doc{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:-0.5px}
+.drawer-logo-words .wm-forge{font-size:18px;font-weight:400;color:var(--text-muted);letter-spacing:-0.3px}
+.drawer-menu{display:flex;flex-direction:column;gap:8px}
+.menu-item-group{display:flex;flex-direction:column}
+.menu-trigger{display:flex;align-items:center;justify-content:space-between;background:none;border:none;color:var(--text-primary);font-family:inherit;font-size:15px;font-weight:600;padding:12px 14px;border-radius:10px;cursor:pointer;text-align:left;transition:background-color .2s ease,color .2s ease;width:100%}
+.menu-trigger:hover{background:var(--overlay-hover)}
+.menu-trigger .chevron{transition:transform .2s ease}
+.menu-trigger.active .chevron{transform:rotate(180deg)}
+.menu-submenu{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(0.4, 0, 0.2, 1);display:flex;flex-direction:column;padding-left:16px;gap:4px}
+.menu-submenu.open{max-height:550px}
+.submenu-link{color:var(--text-muted);font-size:13.5px;text-decoration:none;padding:8px 12px;border-radius:8px;transition:color .2s ease,background-color .2s ease}
+.submenu-link:hover{color:var(--accent);background:var(--bg-swatch-tint)}
+.submenu-link.main-link{font-weight:600;border-top:1px dashed var(--border-color);margin-top:4px;padding-top:8px}
+
+.ratio-row{display:flex;gap:6px;flex-wrap:wrap}
+.ratio-btn{background:var(--bg-page);border:1px solid var(--border-color);padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text-primary);cursor:pointer}
+.ratio-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <button id="menu-toggle" class="icon-btn" aria-label="Open menu" title="Menu">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <a href="index.html" class="nav-logo" aria-label="DocForge Home">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+          <rect x="24" y="16" width="52" height="68" rx="14" fill="white" fill-opacity="0.15" stroke="white" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M59 23 L37 50 H52 L35 77" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="nav-logo-words">
+        <span class="wm-doc">Doc</span><span class="wm-forge">Forge</span>
+      </div>
+    </a>
+    <span class="nav-crumb">/ Image Tools</span>
+  </div>
+  <div class="nav-right">
+    <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme" title="Toggle dark / light mode">🌙</button>
+  </div>
+</header>
+
+<!-- Drawer Menu -->
+<div id="menu-overlay" class="menu-overlay"></div>
+<div id="menu-drawer" class="menu-drawer">
+  <div class="drawer-header">
+    <a href="index.html" class="drawer-logo" aria-label="DocForge Home">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+          <rect x="24" y="16" width="52" height="68" rx="14" fill="white" fill-opacity="0.15" stroke="white" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M59 23 L37 50 H52 L35 77" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="drawer-logo-words">
+        <span class="wm-doc">Doc</span><span class="wm-forge">Forge</span>
+      </div>
+    </a>
+    <button id="drawer-close" class="icon-btn" aria-label="Close menu">&times;</button>
+  </div>
+  <div class="drawer-menu">
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="invoices-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+          Invoices
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div id="invoices-sub" class="menu-submenu">
+        <a href="invoice.html?type=classic" class="submenu-link">Classic Invoice</a>
+        <a href="invoice.html?type=modern" class="submenu-link">Modern Invoice</a>
+        <a href="invoice.html?type=minimal" class="submenu-link">Minimal Invoice</a>
+        <a href="invoice.html?type=service" class="submenu-link">Service Invoice</a>
+        <a href="invoice.html?type=freelancer" class="submenu-link">Freelancer Invoice</a>
+        <a href="index.html#invoices" class="submenu-link main-link">View All Invoices →</a>
+      </div>
+    </div>
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="resumes-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="8" r="2"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
+          Resumes
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div id="resumes-sub" class="menu-submenu">
+        <a href="resume.html?theme=classic" class="submenu-link">Classic Resume</a>
+        <a href="resume.html?theme=modern" class="submenu-link">Modern Resume</a>
+        <a href="resume.html?theme=minimal" class="submenu-link">Minimal Resume</a>
+        <a href="resume.html?theme=ats" class="submenu-link">ATS-Friendly Resume</a>
+        <a href="ats-scanner.html" class="submenu-link">🔍 ATS Resume Scanner</a>
+        <a href="index.html#resumes" class="submenu-link main-link">View All Resumes →</a>
+      </div>
+    </div>
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="pdfs-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+          PDFs
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div id="pdfs-sub" class="menu-submenu">
+        <a href="pdf-tools.html?tool=merge" class="submenu-link">Merge PDF</a>
+        <a href="pdf-tools.html?tool=split" class="submenu-link">Split PDF</a>
+        <a href="pdf-tools.html?tool=compress" class="submenu-link">Compress PDF</a>
+        <a href="pdf-tools.html?tool=jpg-to-pdf" class="submenu-link">Photo to PDF</a>
+        <a href="pdf-tools.html?tool=pdf-to-jpg" class="submenu-link">PDF to Photo</a>
+        <a href="pdf-tools.html?tool=xlsx-to-pdf" class="submenu-link">Excel to PDF</a>
+        <a href="pdf-tools.html?tool=pdf-to-word" class="submenu-link">PDF to Word</a>
+        <a href="pdf-tools.html?tool=word-to-pdf" class="submenu-link">Word to PDF</a>
+        <a href="pdf-tools.html?tool=rotate" class="submenu-link">Rotate PDF</a>
+        <a href="pdf-tools.html?tool=watermark" class="submenu-link">Watermark PDF</a>
+        <a href="pdf-tools.html?tool=protect" class="submenu-link">Protect PDF</a>
+        <a href="pdf-tools.html?tool=unlock" class="submenu-link">Unlock PDF</a>
+        <a href="index.html#pdfs" class="submenu-link main-link">View All PDF Tools →</a>
+      </div>
+    </div>
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="images-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Images
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div id="images-sub" class="menu-submenu">
+        <a href="image-tools.html?tool=bg-remove" class="submenu-link">Remove Background</a>
+        <a href="image-tools.html?tool=enhance" class="submenu-link">Enhance Quality</a>
+        <a href="image-tools.html?tool=adjust" class="submenu-link">Adjust Color & Brightness</a>
+        <a href="image-tools.html?tool=crop-rotate" class="submenu-link">Crop & Rotate</a>
+        <a href="index.html#images" class="submenu-link main-link">View All Image Tools →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="page-head">
+    <h1>Image Tools</h1>
+    <p>Premium browser-side image processing. Your files are processed locally and never sent to any server.</p>
+  </div>
+
+  <div class="tool-picker" id="tool-picker">
+    <button class="chip active" onclick="switchTool('bg-remove')">✨ Background Remover</button>
+    <button class="chip" onclick="switchTool('enhance')">🔬 Enhance Quality</button>
+    <button class="chip" onclick="switchTool('adjust')">🎨 Adjustments</button>
+    <button class="chip" onclick="switchTool('crop-rotate')">✂️ Crop &amp; Rotate</button>
+  </div>
+
+  <div class="editor-layout">
+    <!-- Preview Area -->
+    <div class="preview-area" id="preview-area">
+      <div class="dropzone" id="dropzone">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        <div class="dz-main">Choose an image or drag &amp; drop here</div>
+        <div class="dz-sub">Accepts JPG, PNG, WEBP</div>
+        <input type="file" id="file-input" accept="image/*" style="display:none">
+      </div>
+      
+      <div class="canvas-container" id="canvas-container" style="display:none">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Controls Sidebar -->
+    <aside class="control-sidebar" id="control-sidebar">
+      <!-- Background Remover Controls -->
+      <div class="tool-section" id="section-bg-remove">
+        <h2 class="section-label">Background Remover</h2>
+        <div class="control-group">
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-bottom:10px">Removes solid or dominant backgrounds. Select the color you wish to make transparent, or let the automatic mode detect it.</p>
+          <div class="field">
+            <label>Tolerance <span>5%</span></label>
+            <input type="range" id="bg-tolerance" min="1" max="100" value="15" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Smoothing <span>5px</span></label>
+            <input type="range" id="bg-smoothing" min="0" max="20" value="5" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Color Picker Mode</label>
+            <div class="color-picker-row">
+              <input type="color" id="bg-color-picker" class="color-swatch-picker" value="#ffffff" onchange="applyActiveTool()">
+              <button class="btn-secondary" onclick="autoDetectBgColor()" style="font-size:12px;padding:8px 12px">Auto Detect</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhance Quality Controls -->
+      <div class="tool-section" id="section-enhance" style="display:none">
+        <h2 class="section-label">Enhance Quality</h2>
+        <div class="control-group">
+          <div class="field">
+            <label>Sharpening <span>0%</span></label>
+            <input type="range" id="enhance-sharpen" min="0" max="100" value="0" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Denoise / Smooth <span>0%</span></label>
+            <input type="range" id="enhance-smooth" min="0" max="100" value="0" oninput="applyActiveTool()">
+          </div>
+          <div class="field" style="margin-top:10px">
+            <button class="btn-secondary" onclick="autoBalanceImage()" style="width:100%;padding:10px">Auto Balance Colors</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adjustments Controls -->
+      <div class="tool-section" id="section-adjust" style="display:none">
+        <h2 class="section-label">Adjustments</h2>
+        <div class="control-group">
+          <div class="field">
+            <label>Brightness <span>100%</span></label>
+            <input type="range" id="adj-brightness" min="0" max="200" value="100" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Contrast <span>100%</span></label>
+            <input type="range" id="adj-contrast" min="0" max="200" value="100" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Saturation <span>100%</span></label>
+            <input type="range" id="adj-saturation" min="0" max="200" value="100" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Hue-Rotate <span>0&deg;</span></label>
+            <input type="range" id="adj-hue" min="0" max="360" value="0" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Grayscale <span>0%</span></label>
+            <input type="range" id="adj-grayscale" min="0" max="100" value="0" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Sepia <span>0%</span></label>
+            <input type="range" id="adj-sepia" min="0" max="100" value="0" oninput="applyActiveTool()">
+          </div>
+          <div class="field">
+            <label>Blur <span>0px</span></label>
+            <input type="range" id="adj-blur" min="0" max="20" value="0" oninput="applyActiveTool()">
+          </div>
+
+          <h3 class="section-label" style="margin-top:14px">Preset Filters</h3>
+          <div class="preset-grid">
+            <button class="preset-btn active" onclick="applyFilterPreset('none')">None</button>
+            <button class="preset-btn" onclick="applyFilterPreset('vibrant')">Vibrant</button>
+            <button class="preset-btn" onclick="applyFilterPreset('vintage')">Vintage</button>
+            <button class="preset-btn" onclick="applyFilterPreset('cinematic')">Cinema</button>
+            <button class="preset-btn" onclick="applyFilterPreset('warm')">Warm</button>
+            <button class="preset-btn" onclick="applyFilterPreset('cool')">Cool</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crop & Rotate Controls -->
+      <div class="tool-section" id="section-crop-rotate" style="display:none">
+        <h2 class="section-label">Crop &amp; Rotate</h2>
+        <div class="control-group">
+          <div style="display:flex;gap:8px">
+            <button class="btn-secondary" onclick="rotateImage(-90)" style="flex:1">Rotate ↺</button>
+            <button class="btn-secondary" onclick="rotateImage(90)" style="flex:1">Rotate ↻</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-secondary" onclick="flipImage('h')" style="flex:1">Flip Horizontal</button>
+            <button class="btn-secondary" onclick="flipImage('v')" style="flex:1">Flip Vertical</button>
+          </div>
+          
+          <div class="field" style="margin-top:10px">
+            <label>Crop Ratio</label>
+            <div class="ratio-row">
+              <button class="ratio-btn active" onclick="setCropRatio('free')">Free</button>
+              <button class="ratio-btn" onclick="setCropRatio('1:1')">1:1 Square</button>
+              <button class="ratio-btn" onclick="setCropRatio('4:3')">4:3 Standard</button>
+              <button class="ratio-btn" onclick="setCropRatio('16:9')">16:9 Cinema</button>
+            </div>
+          </div>
+          
+          <button class="btn-primary" onclick="executeCrop()" id="crop-btn" style="margin-top:10px">Apply Crop</button>
+        </div>
+      </div>
+
+      <div style="margin-top:auto;border-top:1px solid var(--border-color);padding-top:16px;display:flex;flex-direction:column;gap:8px">
+        <button class="btn-secondary" onclick="resetAll()" style="width:100%">Reset Changes</button>
+        <div class="field">
+          <label for="export-format">Export Format</label>
+          <select id="export-format" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border-color);background:var(--surface-color);color:var(--text-color);font-size:13px;cursor:pointer">
+            <option value="png">PNG (Lossless)</option>
+            <option value="jpeg">JPEG (Smaller file)</option>
+            <option value="webp">WebP (Best quality/size)</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="save-btn" disabled onclick="downloadImage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export Image
+        </button>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+/* ============== Theme ============== */
+const themeToggle = document.getElementById('theme-toggle');
+const rootEl = document.documentElement;
+function paintThemeIcon(t){ themeToggle.textContent = t === 'dark' ? '☀️' : '🌙'; }
+if(localStorage.getItem('theme') === 'dark'){ rootEl.setAttribute('data-theme','dark'); }
+paintThemeIcon(rootEl.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+themeToggle.addEventListener('click', () => {
+  const isDark = rootEl.getAttribute('data-theme') === 'dark';
+  if(isDark){ rootEl.removeAttribute('data-theme'); localStorage.setItem('theme','light'); paintThemeIcon('light'); }
+  else{ rootEl.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); paintThemeIcon('dark'); }
+});
+
+/* ============== State ============== */
+let activeTool = 'bg-remove';
+let originalImage = null; // Image Object
+let sourceCanvas = document.createElement('canvas'); // Clean original pixels
+let resultCanvas = document.getElementById('editorCanvas');
+let resultCtx = resultCanvas.getContext('2d');
+let activeFilterPreset = 'none';
+
+/* ============== Drag & Drop Zone ============== */
+const dz = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+
+dz.addEventListener('click', () => fileInput.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      originalImage = img;
+      
+      // Initialize Source Canvas (stores copy of original image pixels)
+      sourceCanvas.width = img.naturalWidth;
+      sourceCanvas.height = img.naturalHeight;
+      const srcCtx = sourceCanvas.getContext('2d');
+      srcCtx.drawImage(img, 0, 0);
+
+      // Show Canvas Container
+      document.getElementById('dropzone').style.display = 'none';
+      document.getElementById('canvas-container').style.display = 'block';
+      document.getElementById('save-btn').disabled = false;
+
+      autoDetectBgColor(); // Setup color picker to default background color
+      resetAll();
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ============== Tool Switching ============== */
+const TOOL_ORDER = ['bg-remove','enhance','adjust','crop-rotate'];
+
+function switchToolByKey(toolKey) {
+  activeTool = toolKey;
+
+  // Highlight Tab/Chip matching the tool
+  const chips = document.querySelectorAll('.tool-picker .chip');
+  chips.forEach((chip, i) => chip.classList.toggle('active', TOOL_ORDER[i] === toolKey));
+
+  // Toggle Control Sidebars
+  const sections = document.querySelectorAll('.tool-section');
+  sections.forEach(sec => sec.style.display = 'none');
+  const sec = document.getElementById(`section-${toolKey}`);
+  if (sec) sec.style.display = 'block';
+
+  applyActiveTool();
+}
+
+function switchTool(toolKey) {
+  switchToolByKey(toolKey);
+}
+
+function updateSliderLabels() {
+  // Update spans inside labels to show current slider percentage
+  const inputs = document.querySelectorAll('.field input[type=range]');
+  inputs.forEach(input => {
+    const labelSpan = input.previousElementSibling ? input.previousElementSibling.querySelector('span') : null;
+    if (labelSpan) {
+      let suffix = '%';
+      if (input.id.includes('hue')) suffix = '°';
+      if (input.id.includes('blur') || input.id.includes('smooth')) suffix = 'px';
+      labelSpan.textContent = input.value + suffix;
+    }
+  });
+}
+
+/* ============== Image Processing Algorithms ============== */
+function applyActiveTool() {
+  if (!originalImage) return;
+  updateSliderLabels();
+
+  // Reset result canvas matching the source dimensions
+  resultCanvas.width = sourceCanvas.width;
+  resultCanvas.height = sourceCanvas.height;
+  resultCtx.drawImage(sourceCanvas, 0, 0);
+
+  // Apply Brightness/Contrast/Saturation/Filters if adjust is active or parameters are set
+  applyAdjustmentsAndFilters();
+
+  if (activeTool === 'bg-remove') {
+    applyBackgroundRemover();
+  } else if (activeTool === 'enhance') {
+    applyQualityEnhancements();
+  }
+}
+
+/* 1. Color Adjustments and Filters */
+function applyAdjustmentsAndFilters() {
+  const brightness = document.getElementById('adj-brightness').value;
+  const contrast = document.getElementById('adj-contrast').value;
+  const saturation = document.getElementById('adj-saturation').value;
+  const hue = document.getElementById('adj-hue').value;
+  const grayscale = document.getElementById('adj-grayscale').value;
+  const sepia = document.getElementById('adj-sepia').value;
+  const blurVal = document.getElementById('adj-blur').value;
+
+  let filterString = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg) grayscale(${grayscale}%) sepia(${sepia}%)`;
+  if (parseInt(blurVal) > 0) filterString += ` blur(${blurVal}px)`;
+
+  // Apply custom CSS presets on canvas draw if applicable
+  if (activeFilterPreset === 'vibrant') filterString += ' saturate(140%) contrast(110%)';
+  else if (activeFilterPreset === 'vintage') filterString += ' sepia(50%) contrast(90%) saturate(85%) hue-rotate(-10deg)';
+  else if (activeFilterPreset === 'cinematic') filterString += ' contrast(125%) brightness(90%) saturate(90%)';
+  else if (activeFilterPreset === 'warm') filterString += ' sepia(20%) saturate(110%) hue-rotate(5deg)';
+  else if (activeFilterPreset === 'cool') filterString += ' hue-rotate(-10deg) saturate(110%)';
+
+  // Apply filters using temporary filter property of context
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = resultCanvas.width;
+  tempCanvas.height = resultCanvas.height;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.filter = filterString;
+  tempCtx.drawImage(resultCanvas, 0, 0);
+  
+  // Re-draw onto result canvas
+  resultCtx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+  resultCtx.drawImage(tempCanvas, 0, 0);
+}
+
+function applyFilterPreset(presetName) {
+  activeFilterPreset = presetName;
+  const btns = document.querySelectorAll('.preset-grid .preset-btn');
+  btns.forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  applyActiveTool();
+}
+
+/* 2. Background Remover */
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : {r: 255, g: 255, b: 255};
+}
+
+function autoDetectBgColor() {
+  if (!originalImage) return;
+  
+  // Sample corner pixels to guess background color
+  const ctx = sourceCanvas.getContext('2d');
+  const corners = [
+    ctx.getImageData(0, 0, 1, 1).data,
+    ctx.getImageData(sourceCanvas.width - 1, 0, 1, 1).data,
+    ctx.getImageData(0, sourceCanvas.height - 1, 1, 1).data,
+    ctx.getImageData(sourceCanvas.width - 1, sourceCanvas.height - 1, 1, 1).data
+  ];
+
+  // Average them
+  let r = 0, g = 0, b = 0;
+  corners.forEach(c => { r += c[0]; g += c[1]; b += c[2]; });
+  r = Math.round(r / 4);
+  g = Math.round(g / 4);
+  b = Math.round(b / 4);
+
+  // Convert to hex
+  const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  document.getElementById('bg-color-picker').value = hex;
+  applyActiveTool();
+}
+
+function applyBackgroundRemover() {
+  const targetHex = document.getElementById('bg-color-picker').value;
+  const target = hexToRgb(targetHex);
+  const tolerance = document.getElementById('bg-tolerance').value * 2.55; // mapping 0-100 to 0-255
+  const smoothing = parseInt(document.getElementById('bg-smoothing').value);
+
+  const imgData = resultCtx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
+  const data = imgData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i+1];
+    const b = data[i+2];
+    const a = data[i+3];
+
+    if (a === 0) continue;
+
+    // Euclidean distance in RGB color space
+    const dist = Math.sqrt(
+      (r - target.r) * (r - target.r) +
+      (g - target.g) * (g - target.g) +
+      (b - target.b) * (b - target.b)
+    );
+
+    if (dist <= tolerance) {
+      data[i+3] = 0; // completely transparent
+    } else if (smoothing > 0 && dist <= tolerance + smoothing * 2) {
+      // Soft transition border edge
+      const ratio = (dist - tolerance) / (smoothing * 2);
+      data[i+3] = Math.round(ratio * a);
+    }
+  }
+
+  resultCtx.putImageData(imgData, 0, 0);
+}
+
+/* 3. Quality Enhancements (Sharpening Convolution Matrix) */
+function applyQualityEnhancements() {
+  const sharpenVal = document.getElementById('enhance-sharpen').value / 100;
+  const smoothVal = document.getElementById('enhance-smooth').value / 100;
+
+  if (sharpenVal > 0) {
+    // Convolution sharpening matrix
+    const w = sharpenVal;
+    const weights = [
+       0,  -w,  0,
+      -w, 1 + 4*w, -w,
+       0,  -w,  0
+    ];
+    convolute(weights);
+  }
+
+  if (smoothVal > 0) {
+    // Box blur matrix
+    const w = smoothVal / 9;
+    const weights = [
+      w, w, w,
+      w, w, w,
+      w, w, w
+    ];
+    convolute(weights);
+  }
+}
+
+function convolute(weights) {
+  const side = Math.round(Math.sqrt(weights.length));
+  const halfSide = Math.floor(side/2);
+  const src = resultCtx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
+  const srcData = src.data;
+  const sw = src.width;
+  const sh = src.height;
+
+  const output = resultCtx.createImageData(sw, sh);
+  const dstData = output.data;
+
+  for (let y=0; y<sh; y++) {
+    for (let x=0; x<sw; x++) {
+      const sy = y;
+      const sx = x;
+      const dstOff = (y*sw+x)*4;
+
+      // calculate average color from surrounding matrix weights
+      let r=0, g=0, b=0, a=0;
+      for (let cy=0; cy<side; cy++) {
+        for (let cx=0; cx<side; cx++) {
+          const scy = Math.min(sh-1, Math.max(0, sy + cy - halfSide));
+          const scx = Math.min(sw-1, Math.max(0, sx + cx - halfSide));
+          const srcOff = (scy*sw+scx)*4;
+          const wt = weights[cy*side+cx];
+          r += srcData[srcOff] * wt;
+          g += srcData[srcOff+1] * wt;
+          b += srcData[srcOff+2] * wt;
+          a += srcData[srcOff+3] * wt;
+        }
+      }
+
+      dstData[dstOff] = Math.min(255, Math.max(0, r));
+      dstData[dstOff+1] = Math.min(255, Math.max(0, g));
+      dstData[dstOff+2] = Math.min(255, Math.max(0, b));
+      dstData[dstOff+3] = Math.min(255, Math.max(0, a));
+    }
+  }
+  resultCtx.putImageData(output, 0, 0);
+}
+
+function autoBalanceImage() {
+  if (!originalImage) return;
+  const imgData = resultCtx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
+  const data = imgData.data;
+
+  // Calculate pixel bounds (Min/Max values in red, green, blue for simple contrast stretching)
+  let rMin = 255, rMax = 0, gMin = 255, gMax = 0, bMin = 255, bMax = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i+3] === 0) continue; // Skip transparency
+    const r = data[i];
+    const g = data[i+1];
+    const b = data[i+2];
+    if (r < rMin) rMin = r; if (r > rMax) rMax = r;
+    if (g < gMin) gMin = g; if (g > gMax) gMax = g;
+    if (b < bMin) bMin = b; if (b > bMax) bMax = b;
+  }
+
+  // Apply contrast stretch stretch
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i+3] === 0) continue;
+    data[i]   = Math.round((data[i]   - rMin) * 255 / (rMax - rMin));
+    data[i+1] = Math.round((data[i+1] - gMin) * 255 / (gMax - gMin));
+    data[i+2] = Math.round((data[i+2] - bMin) * 255 / (bMax - bMin));
+  }
+  resultCtx.putImageData(imgData, 0, 0);
+
+  // Sync back to Source Canvas copy
+  const srcCtx = sourceCanvas.getContext('2d');
+  sourceCanvas.width = resultCanvas.width;
+  sourceCanvas.height = resultCanvas.height;
+  srcCtx.drawImage(resultCanvas, 0, 0);
+}
+
+/* 4. Rotate and Flip */
+function rotateImage(deg) {
+  if (!originalImage) return;
+
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+
+  if (Math.abs(deg) === 90) {
+    tempCanvas.width = sourceCanvas.height;
+    tempCanvas.height = sourceCanvas.width;
+    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+    tempCtx.rotate(deg * Math.PI / 180);
+    tempCtx.drawImage(sourceCanvas, -sourceCanvas.width / 2, -sourceCanvas.height / 2);
+  } else {
+    // 180 deg
+    tempCanvas.width = sourceCanvas.width;
+    tempCanvas.height = sourceCanvas.height;
+    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+    tempCtx.rotate(180 * Math.PI / 180);
+    tempCtx.drawImage(sourceCanvas, -sourceCanvas.width / 2, -sourceCanvas.height / 2);
+  }
+
+  sourceCanvas.width = tempCanvas.width;
+  sourceCanvas.height = tempCanvas.height;
+  const srcCtx = sourceCanvas.getContext('2d');
+  srcCtx.drawImage(tempCanvas, 0, 0);
+
+  applyActiveTool();
+}
+
+function flipImage(dir) {
+  if (!originalImage) return;
+
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = sourceCanvas.width;
+  tempCanvas.height = sourceCanvas.height;
+  const tempCtx = tempCanvas.getContext('2d');
+
+  if (dir === 'h') {
+    // flip horizontal
+    tempCtx.translate(tempCanvas.width, 0);
+    tempCtx.scale(-1, 1);
+  } else {
+    // flip vertical
+    tempCtx.translate(0, tempCanvas.height);
+    tempCtx.scale(1, -1);
+  }
+  tempCtx.drawImage(sourceCanvas, 0, 0);
+
+  const srcCtx = sourceCanvas.getContext('2d');
+  srcCtx.drawImage(tempCanvas, 0, 0);
+
+  applyActiveTool();
+}
+
+/* 5. Cropping */
+let cropRatio = 'free';
+
+function setCropRatio(ratio) {
+  cropRatio = ratio;
+  const btns = document.querySelectorAll('.ratio-btn');
+  btns.forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function executeCrop() {
+  if (!originalImage) return;
+  // Simple crop: crop 10% outer edges as basic placeholder or centered crop
+  let w = sourceCanvas.width;
+  let h = sourceCanvas.height;
+
+  let cropW = w;
+  let cropH = h;
+  let startX = 0;
+  let startY = 0;
+
+  if (cropRatio === '1:1') {
+    const size = Math.min(w, h);
+    cropW = size; cropH = size;
+    startX = (w - size) / 2;
+    startY = (h - size) / 2;
+  } else if (cropRatio === '4:3') {
+    if (w / h > 4/3) {
+      cropH = h; cropW = h * (4/3);
+      startX = (w - cropW) / 2;
+    } else {
+      cropW = w; cropH = w / (4/3);
+      startY = (h - cropH) / 2;
+    }
+  } else if (cropRatio === '16:9') {
+    if (w / h > 16/9) {
+      cropH = h; cropW = h * (16/9);
+      startX = (w - cropW) / 2;
+    } else {
+      cropW = w; cropH = w / (16/9);
+      startY = (h - cropH) / 2;
+    }
+  } else {
+    // free crop - crop centered 10%
+    cropW = Math.round(w * 0.8);
+    cropH = Math.round(h * 0.8);
+    startX = Math.round(w * 0.1);
+    startY = Math.round(h * 0.1);
+  }
+
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = cropW;
+  tempCanvas.height = cropH;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.drawImage(sourceCanvas, startX, startY, cropW, cropH, 0, 0, cropW, cropH);
+
+  sourceCanvas.width = cropW;
+  sourceCanvas.height = cropH;
+  const srcCtx = sourceCanvas.getContext('2d');
+  srcCtx.drawImage(tempCanvas, 0, 0);
+
+  applyActiveTool();
+}
+
+/* ============== Resets and Downloader ============== */
+function resetAll() {
+  if (!originalImage) return;
+
+  // Reset inputs
+  document.getElementById('bg-tolerance').value = 15;
+  document.getElementById('bg-smoothing').value = 5;
+  document.getElementById('enhance-sharpen').value = 0;
+  document.getElementById('enhance-smooth').value = 0;
+  document.getElementById('adj-brightness').value = 100;
+  document.getElementById('adj-contrast').value = 100;
+  document.getElementById('adj-saturation').value = 100;
+  document.getElementById('adj-hue').value = 0;
+  document.getElementById('adj-grayscale').value = 0;
+  document.getElementById('adj-sepia').value = 0;
+  document.getElementById('adj-blur').value = 0;
+
+  activeFilterPreset = 'none';
+  const filterBtns = document.querySelectorAll('.preset-grid .preset-btn');
+  filterBtns.forEach(btn => btn.classList.remove('active'));
+  filterBtns[0].classList.add('active');
+
+  // Re-sync Source Canvas to pure original image pixels
+  sourceCanvas.width = originalImage.naturalWidth;
+  sourceCanvas.height = originalImage.naturalHeight;
+  const srcCtx = sourceCanvas.getContext('2d');
+  srcCtx.drawImage(originalImage, 0, 0);
+
+  applyActiveTool();
+}
+
+function downloadImage() {
+  if (!originalImage) return;
+  const fmt = document.getElementById('export-format').value;
+  const mimeMap = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' };
+  const mime = mimeMap[fmt] || 'image/png';
+  const link = document.createElement('a');
+  link.download = `edited_image.${fmt}`;
+  link.href = resultCanvas.toDataURL(mime, 0.92);
+  link.click();
+}
+
+/* ============== Navigation Menu Drawer ============== */
+const menuToggle = document.getElementById('menu-toggle');
+const menuDrawer = document.getElementById('menu-drawer');
+const menuOverlay = document.getElementById('menu-overlay');
+const drawerClose = document.getElementById('drawer-close');
+
+function openDrawer() { menuDrawer.classList.add('open'); menuOverlay.classList.add('open'); }
+function closeDrawer() { menuDrawer.classList.remove('open'); menuOverlay.classList.remove('open'); }
+
+menuToggle.addEventListener('click', openDrawer);
+drawerClose.addEventListener('click', closeDrawer);
+menuOverlay.addEventListener('click', closeDrawer);
+
+const triggers = document.querySelectorAll('.menu-trigger');
+triggers.forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const targetId = trigger.getAttribute('data-accordion');
+    const submenu = document.getElementById(targetId);
+    const isOpen = submenu.classList.contains('open');
+    document.querySelectorAll('.menu-submenu').forEach(sub => sub.classList.remove('open'));
+    document.querySelectorAll('.menu-trigger').forEach(trig => trig.classList.remove('active'));
+    if (!isOpen) { trigger.classList.add('active'); submenu.classList.add('open'); }
+  });
+});
+
+/* ============== URL Parameter: auto-select tool on load ============== */
+(function initFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const tool = params.get('tool');
+  if (tool && TOOL_ORDER.includes(tool)) {
+    switchToolByKey(tool);
+  } else {
+    switchToolByKey('bg-remove'); // default
+  }
+})();
+</script>
+</body>
+</html>

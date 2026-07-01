@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Check and scan your resume with our free online ATS Resume Scanner. Grade your resume structure, content, action verbs, and keyword density against top jobs in seconds.">
+<meta name="keywords" content="ATS resume scanner, ATS resume checker, check resume score, resume scan docx, scan resume pdf, resume keyword match">
+<title>DocForge — ATS Resume Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  color-scheme:light;
+  --bg-page:#f0f4f8;
+  --bg-surface:#ffffff;
+  --bg-swatch-tint:#eff6ff;
+  --text-primary:#1e293b;
+  --text-muted:#64748b;
+  --text-faint:#6b7280;
+  --border-color:#e2e8f0;
+  --accent:#1a56db;
+  --accent-hover:#154bc4;
+  --shadow-color:rgba(0,0,0,.08);
+  --overlay-hover:rgba(0,0,0,.03);
+  --input-bg:#ffffff;
+  --success:#16a34a;
+  --success-bg:#f0fdf4;
+  --warn:#d97706;
+  --warn-bg:#fffbeb;
+  --error:#dc2626;
+  --error-bg:#fef2f2;
+}
+[data-theme="dark"]{
+  color-scheme:dark;
+  --bg-page:#0b1120;
+  --bg-surface:#111827;
+  --bg-swatch-tint:#0f1e3d;
+  --text-primary:#e5e7eb;
+  --text-muted:#94a3b8;
+  --text-faint:#9ca3af;
+  --border-color:#293244;
+  --accent:#5b8def;
+  --accent-hover:#7ba1f2;
+  --shadow-color:rgba(0,0,0,.5);
+  --overlay-hover:rgba(255,255,255,.04);
+  --input-bg:#0f172a;
+  --success:#4ade80;
+  --success-bg:#0f2417;
+  --warn:#fbbf24;
+  --warn-bg:#1c1a0e;
+  --error:#f87171;
+  --error-bg:#2a1414;
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg-page);color:var(--text-primary);padding-top:60px;transition:background-color .25s ease,color .25s ease}
+
+/* ===== Navbar ===== */
+.navbar{background:var(--bg-surface);border-bottom:1px solid var(--border-color);padding:0 16px;height:60px;display:flex;align-items:center;gap:14px;position:fixed;top:0;left:0;width:100%;z-index:1000}
+.nav-left{display:flex;align-items:center;gap:6px}
+.icon-btn{background:none;border:1px solid var(--border-color);color:var(--text-primary);width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .2s ease,transform .15s ease;flex-shrink:0}
+.icon-btn:hover{background:var(--overlay-hover);transform:translateY(-1px)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;cursor:pointer}
+.nav-logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1a56db 0%,#3b82f6 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(26,86,219,.3)}
+.nav-logo-words{display:flex;align-items:baseline}
+.nav-logo-words .wm-doc{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:-0.5px;line-height:1}
+.nav-logo-words .wm-forge{font-size:18px;font-weight:400;color:var(--text-muted);letter-spacing:-0.3px;line-height:1}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ===== Layout ===== */
+.wrap{max-width:780px;margin:0 auto;padding:36px 20px 80px}
+
+/* ===== Upload Card ===== */
+.hero-card{
+  background:var(--bg-surface);
+  border:1px solid var(--border-color);
+  border-radius:20px;
+  padding:40px 36px;
+  text-align:center;
+  margin-bottom:28px;
+  transition:background-color .25s ease,border-color .25s ease;
+}
+.hero-card h1{font-size:28px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
+.hero-card p{color:var(--text-muted);font-size:14px;line-height:1.6;max-width:500px;margin:0 auto 28px}
+
+.dropzone{
+  border:2px dashed var(--border-color);
+  border-radius:14px;
+  padding:36px 24px;
+  cursor:pointer;
+  transition:border-color .15s ease,background-color .15s ease;
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);background:var(--bg-swatch-tint)}
+.dz-icon{color:var(--text-faint);margin-bottom:10px}
+.dz-main{font-size:14px;font-weight:600}
+.dz-sub{font-size:12px;color:var(--text-muted);margin-top:5px}
+.dz-file-input{display:none}
+
+/* ===== Job Description (optional) ===== */
+.jd-card{
+  background:var(--bg-surface);
+  border:1px solid var(--border-color);
+  border-radius:16px;
+  padding:22px 28px;
+  margin-bottom:28px;
+  transition:background-color .25s ease,border-color .25s ease;
+}
+.jd-card summary{
+  font-size:13px;font-weight:700;color:var(--text-faint);
+  text-transform:uppercase;letter-spacing:.5px;cursor:pointer;
+  list-style:none;display:flex;align-items:center;gap:8px;
+}
+.jd-card summary::-webkit-details-marker{display:none}
+.jd-card summary::before{content:'▸';transition:transform .2s ease;display:inline-block}
+.jd-card[open] summary::before{transform:rotate(90deg)}
+.jd-card textarea{
+  width:100%;min-height:120px;resize:vertical;margin-top:14px;
+  border:1px solid var(--border-color);border-radius:10px;padding:12px 14px;
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--text-primary);
+  background:var(--input-bg);outline:none;
+}
+.jd-card textarea:focus{border-color:var(--accent)}
+.jd-hint{font-size:11px;color:var(--text-muted);margin-top:6px}
+
+/* ===== Scanning Animation ===== */
+.scanner-overlay{
+  display:none;
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(10,15,30,0.88);
+  backdrop-filter:blur(10px);
+  z-index:5000;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:28px;
+}
+.scanner-overlay.show{display:flex}
+
+.scan-ring{
+  width:140px;height:140px;
+  position:relative;
+}
+.scan-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.scan-ring .track{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:6}
+.scan-ring .progress{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:408;transition:stroke-dashoffset 0.3s ease}
+.scan-pct{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:36px;font-weight:800;color:#fff;
+}
+.scan-label{color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;text-align:center;letter-spacing:.3px}
+.scan-detail{color:rgba(255,255,255,0.45);font-size:12px;text-align:center;max-width:340px}
+
+/* Line scanner bar animation */
+.scan-bar-wrap{
+  width:260px;height:4px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;
+}
+.scan-bar{
+  width:40%;height:100%;border-radius:4px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  animation:scanSlide 1.2s ease-in-out infinite;
+}
+@keyframes scanSlide{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(350%)}
+}
+
+/* ===== Results ===== */
+.results{display:none}
+.results.show{display:block}
+
+.score-card{
+  background:var(--bg-surface);
+  border:1px solid var(--border-color);
+  border-radius:20px;
+  padding:32px 36px;
+  text-align:center;
+  margin-bottom:24px;
+}
+.score-ring-wrap{
+  width:140px;height:140px;margin:0 auto 16px;position:relative;
+}
+.score-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring-wrap .track{fill:none;stroke:var(--border-color);stroke-width:7}
+.score-ring-wrap .fill{fill:none;stroke-width:7;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:408;transition:stroke-dashoffset 1.2s ease}
+.score-num{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:40px;font-weight:800;line-height:1;
+}
+.score-num span{font-size:16px;color:var(--text-muted);font-weight:600}
+.score-label{font-size:16px;font-weight:700;margin-bottom:4px}
+.score-tip{font-size:12.5px;color:var(--text-muted);max-width:420px;margin:0 auto;line-height:1.5}
+
+.check-group{
+  background:var(--bg-surface);
+  border:1px solid var(--border-color);
+  border-radius:16px;
+  padding:22px 28px;
+  margin-bottom:18px;
+}
+.check-group-title{
+  font-size:12px;font-weight:700;color:var(--text-faint);
+  text-transform:uppercase;letter-spacing:.6px;
+  margin-bottom:14px;padding-bottom:10px;
+  border-bottom:1px solid var(--border-color);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.check-group-pts{
+  font-size:11px;font-weight:600;
+  padding:2px 10px;border-radius:20px;
+}
+.check-item{
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:13px;line-height:1.5;
+  padding:6px 0;
+}
+.check-icon{
+  width:20px;height:20px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;
+}
+.check-icon.pass{background:var(--success-bg);color:var(--success)}
+.check-icon.fail{background:var(--error-bg);color:var(--error)}
+.check-icon.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* Keywords */
+.kw-section{margin-top:12px}
+.kw-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kw-label.matched{color:var(--success)}
+.kw-label.missing{color:var(--error)}
+.kw-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.kw-pill{
+  font-size:11px;font-weight:600;
+  padding:4px 10px;border-radius:20px;
+}
+.kw-pill.matched{background:var(--success-bg);color:var(--success)}
+.kw-pill.missing{background:var(--error-bg);color:var(--error)}
+
+/* Re-scan button */
+.btn-rescan{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent);color:#fff;border:none;
+  padding:12px 24px;border-radius:10px;
+  font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:background .15s ease;
+  margin-top:8px;
+}
+.btn-rescan:hover{background:var(--accent-hover)}
+
+/* ===== Drawer & Sidebar Menu ===== */
+.menu-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.3);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:1000;
+}
+.menu-overlay.open{opacity:1;pointer-events:auto}
+.menu-drawer{
+  position:fixed;top:0;left:-320px;width:300px;height:100%;
+  background:var(--bg-surface);border-right:1px solid var(--border-color);
+  display:flex;flex-direction:column;
+  transition:left .3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index:1001;box-shadow:4px 0 24px var(--shadow-color);
+  padding:24px 16px;overflow-y:auto;
+}
+.menu-drawer.open{left:0}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border-color)}
+.drawer-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.drawer-logo-words{display:flex;align-items:baseline}
+.drawer-logo-words .wm-doc{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:-0.5px}
+.drawer-logo-words .wm-forge{font-size:18px;font-weight:400;color:var(--text-muted);letter-spacing:-0.3px}
+.drawer-menu{display:flex;flex-direction:column;gap:8px}
+.menu-item-group{display:flex;flex-direction:column}
+.menu-trigger{display:flex;align-items:center;justify-content:space-between;background:none;border:none;color:var(--text-primary);font-family:inherit;font-size:15px;font-weight:600;padding:12px 14px;border-radius:10px;cursor:pointer;text-align:left;transition:background-color .2s ease,color .2s ease;width:100%}
+.menu-trigger:hover{background:var(--overlay-hover)}
+.menu-trigger .chevron{transition:transform .2s ease}
+.menu-trigger.active .chevron{transform:rotate(180deg)}
+.menu-submenu{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;padding-left:16px;gap:4px}
+.menu-submenu.open{max-height:550px}
+.submenu-link{color:var(--text-muted);font-size:13.5px;text-decoration:none;padding:8px 12px;border-radius:8px;transition:color .2s ease,background-color .2s ease}
+.submenu-link:hover{color:var(--accent);background:var(--bg-swatch-tint)}
+.submenu-link.main-link{font-weight:600;border-top:1px dashed var(--border-color);margin-top:4px;padding-top:8px}
+
+@media(max-width:600px){
+  .hero-card{padding:28px 18px}
+  .hero-card h1{font-size:22px}
+  .score-card{padding:24px 18px}
+  .check-group{padding:18px 16px}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <button id="menu-toggle" class="icon-btn" aria-label="Open menu" title="Menu">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <a href="index.html" class="nav-logo" aria-label="DocForge Home">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+          <rect x="24" y="16" width="52" height="68" rx="14" fill="white" fill-opacity="0.15" stroke="white" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M59 23 L37 50 H52 L35 77" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="nav-logo-words">
+        <span class="wm-doc">Doc</span><span class="wm-forge">Forge</span>
+      </div>
+    </a>
+  </div>
+  <div class="nav-right">
+    <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme" title="Toggle dark / light mode">🌙</button>
+  </div>
+</nav>
+
+<!-- Drawer -->
+<div id="menu-overlay" class="menu-overlay"></div>
+<div id="menu-drawer" class="menu-drawer">
+  <div class="drawer-header">
+    <a href="index.html" class="drawer-logo" aria-label="DocForge Home">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+          <rect x="24" y="16" width="52" height="68" rx="14" fill="white" fill-opacity="0.15" stroke="white" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M59 23 L37 50 H52 L35 77" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="drawer-logo-words">
+        <span class="wm-doc">Doc</span><span class="wm-forge">Forge</span>
+      </div>
+    </a>
+    <button id="drawer-close" class="icon-btn" aria-label="Close menu">&times;</button>
+  </div>
+  <div class="drawer-menu">
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="invoices-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+          Invoices
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="invoices-sub" class="menu-submenu">
+        <a href="invoice.html?type=classic" class="submenu-link">Classic Invoice</a>
+        <a href="invoice.html?type=modern" class="submenu-link">Modern Invoice</a>
+        <a href="invoice.html?type=minimal" class="submenu-link">Minimal Invoice</a>
+        <a href="invoice.html?type=service" class="submenu-link">Service Invoice</a>
+        <a href="invoice.html?type=freelancer" class="submenu-link">Freelancer Invoice</a>
+        <a href="index.html#invoices" class="submenu-link main-link">View All Invoices →</a>
+      </div>
+    </div>
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="resumes-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="8" r="2"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
+          Resumes
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="resumes-sub" class="menu-submenu">
+        <a href="resume.html?theme=classic" class="submenu-link">Classic Resume</a>
+        <a href="resume.html?theme=modern" class="submenu-link">Modern Resume</a>
+        <a href="resume.html?theme=minimal" class="submenu-link">Minimal Resume</a>
+        <a href="resume.html?theme=ats" class="submenu-link">ATS-Friendly Resume</a>
+        <a href="ats-scanner.html" class="submenu-link">🔍 ATS Resume Scanner</a>
+        <a href="index.html#resumes" class="submenu-link main-link">View All Resumes →</a>
+      </div>
+    </div>
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="pdfs-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+          PDFs
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="pdfs-sub" class="menu-submenu">
+        <a href="pdf-tools.html?tool=merge" class="submenu-link">Merge PDF</a>
+        <a href="pdf-tools.html?tool=split" class="submenu-link">Split PDF</a>
+        <a href="pdf-tools.html?tool=compress" class="submenu-link">Compress PDF</a>
+        <a href="pdf-tools.html?tool=jpg-to-pdf" class="submenu-link">Photo to PDF</a>
+        <a href="pdf-tools.html?tool=pdf-to-jpg" class="submenu-link">PDF to Photo</a>
+        <a href="pdf-tools.html?tool=xlsx-to-pdf" class="submenu-link">Excel to PDF</a>
+        <a href="pdf-tools.html?tool=pdf-to-word" class="submenu-link">PDF to Word</a>
+        <a href="pdf-tools.html?tool=word-to-pdf" class="submenu-link">Word to PDF</a>
+        <a href="pdf-tools.html?tool=rotate" class="submenu-link">Rotate PDF</a>
+        <a href="pdf-tools.html?tool=watermark" class="submenu-link">Watermark PDF</a>
+        <a href="pdf-tools.html?tool=protect" class="submenu-link">Protect PDF</a>
+        <a href="pdf-tools.html?tool=unlock" class="submenu-link">Unlock PDF</a>
+        <a href="index.html#pdfs" class="submenu-link main-link">View All PDF Tools →</a>
+      </div>
+    </div>
+
+    <!-- Image Accordion -->
+    <div class="menu-item-group">
+      <button class="menu-trigger" data-accordion="images-sub">
+        <span style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Images
+        </span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div id="images-sub" class="menu-submenu">
+        <a href="image-tools.html?tool=bg-remove" class="submenu-link">Remove Background</a>
+        <a href="image-tools.html?tool=enhance" class="submenu-link">Enhance Quality</a>
+        <a href="image-tools.html?tool=adjust" class="submenu-link">Adjust Color &amp; Brightness</a>
+        <a href="image-tools.html?tool=crop-rotate" class="submenu-link">Crop &amp; Rotate</a>
+        <a href="index.html#images" class="submenu-link main-link">View All Image Tools →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <!-- Upload area -->
+  <div class="hero-card" id="upload-section">
+    <h1>🔍 ATS Resume Scanner</h1>
+    <p>Upload your resume (PDF or DOCX) and instantly see how well it will perform with Applicant Tracking Systems used by recruiters.</p>
+    <div class="dropzone" id="dropzone">
+      <div class="dz-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="dz-main">Click to upload your resume, or drag &amp; drop</div>
+      <div class="dz-sub">Accepts: PDF, DOCX</div>
+      <input type="file" id="file-input" class="dz-file-input" accept=".pdf,.docx">
+    </div>
+  </div>
+
+  <!-- Optional job description -->
+  <details class="jd-card" id="jd-section">
+    <summary>📋 Paste a Job Description (optional — adds keyword matching)</summary>
+    <textarea id="jobDesc" placeholder="Paste the full job description here to compare your resume against specific keyword requirements…"></textarea>
+    <div class="jd-hint">This compares the top keywords from the job description against words found in your resume.</div>
+  </details>
+
+  <!-- Results (hidden until scan completes) -->
+  <div class="results" id="results"></div>
+</main>
+
+<!-- Scanning Overlay -->
+<div class="scanner-overlay" id="scanner-overlay">
+  <div class="scan-ring">
+    <svg viewBox="0 0 140 140">
+      <circle class="track" cx="70" cy="70" r="65"/>
+      <circle class="progress" id="scan-progress" cx="70" cy="70" r="65"/>
+    </svg>
+    <div class="scan-pct" id="scan-pct">0%</div>
+  </div>
+  <div class="scan-label" id="scan-label">Initializing scanner…</div>
+  <div class="scan-bar-wrap"><div class="scan-bar"></div></div>
+  <div class="scan-detail" id="scan-detail">Analyzing your resume for ATS compatibility</div>
+</div>
+
+<script>
+/* ============== Theme ============== */
+const themeToggle = document.getElementById('theme-toggle');
+const rootEl = document.documentElement;
+function paintThemeIcon(t){ themeToggle.textContent = t === 'dark' ? '☀️' : '🌙'; }
+if(localStorage.getItem('theme') === 'dark'){ rootEl.setAttribute('data-theme','dark'); }
+paintThemeIcon(rootEl.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+themeToggle.addEventListener('click', () => {
+  const isDark = rootEl.getAttribute('data-theme') === 'dark';
+  if(isDark){ rootEl.removeAttribute('data-theme'); localStorage.setItem('theme','light'); paintThemeIcon('light'); }
+  else{ rootEl.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); paintThemeIcon('dark'); }
+});
+
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+/* ============== Dropzone ============== */
+const dz = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+
+dz.addEventListener('click', () => fileInput.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+/* ============== Extract text ============== */
+async function extractText(file){
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if(ext === 'pdf'){
+    const data = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    let text = '';
+    for(let i = 1; i <= pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(it => it.str).join(' ') + '\n';
+    }
+    return text;
+  }
+
+  if(ext === 'docx'){
+    const data = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: data });
+    return result.value;
+  }
+
+  throw new Error('Unsupported file type. Please upload a PDF or DOCX.');
+}
+
+/* ============== Scanner animation ============== */
+function showScanner(){ document.getElementById('scanner-overlay').classList.add('show'); }
+function hideScanner(){ document.getElementById('scanner-overlay').classList.remove('show'); }
+
+function setScanProgress(pct, label, detail){
+  const circle = document.getElementById('scan-progress');
+  const circumference = 2 * Math.PI * 65; // r=65
+  circle.style.strokeDashoffset = circumference - (pct / 100) * circumference;
+  document.getElementById('scan-pct').textContent = Math.round(pct) + '%';
+  if(label) document.getElementById('scan-label').textContent = label;
+  if(detail) document.getElementById('scan-detail').textContent = detail;
+}
+
+function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/* ============== ATS Analysis ============== */
+const STOPWORDS = new Set(['the','and','a','an','of','to','in','for','with','on','at','by','is','are','as','be','or','from','this','that','will','you','your','we','our','their','it','its','into','have','has','must','also','etc','years','year','strong','using','work','working','role','team','ability','able','all','can','do','get','would','should','could','may','just','about','been','they','them','per','was','were','who','what','which','when','where','how','not','no','but','so','if','then','than','too','very','more','most','any','each','some','such','new','other','one','two','three','over','under']);
+
+const ACTION_VERBS = new Set(['achieved','managed','led','developed','created','implemented','designed','increased','decreased','improved','launched','built','delivered','organized','coordinated','analyzed','resolved','negotiated','generated','reduced','streamlined','established','maintained','supervised','trained','mentored','drove','executed','facilitated','optimized','spearheaded','pioneered','revamped','transformed','collaborated','presented','authored','administered','directed','initiated','produced','contributed','supported']);
+
+const ATS_SECTIONS = {
+  contact: /\b(email|phone|address|linkedin|github|portfolio|website|contact)\b/i,
+  summary: /\b(summary|objective|profile|about me|professional summary|career objective)\b/i,
+  experience: /\b(experience|employment|work history|professional experience|career history)\b/i,
+  education: /\b(education|academic|degree|university|college|school|certification|certifications)\b/i,
+  skills: /\b(skills|technologies|tools|competencies|proficiencies|technical skills|core competencies)\b/i,
+};
+
+function extractKeywords(text){
+  return (text.toLowerCase().match(/[a-z][a-z0-9+.#-]{2,}/g) || [])
+    .filter(w => !STOPWORDS.has(w));
+}
+
+function analyzeResume(text){
+  const checks = [];
+  let score = 0;
+
+  const words = text.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const lowerText = text.toLowerCase();
+  const lines = text.split('\n').filter(l => l.trim());
+
+  // === 1. CONTACT INFO (15 pts) ===
+  let contactPts = 0;
+  const hasEmail = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(text);
+  const hasPhone = /(\+?\d[\d\s\-().]{7,}\d)/.test(text);
+  const hasLinkedIn = /linkedin\.com/i.test(text);
+  const hasWebsite = /\b(github|portfolio|website|http|www\.)\b/i.test(text);
+
+  if(hasEmail){ contactPts += 5; checks.push({g:'contact',ok:true,text:'Email address detected'}); }
+  else checks.push({g:'contact',ok:false,text:'No email address found — critical for ATS'});
+  if(hasPhone){ contactPts += 5; checks.push({g:'contact',ok:true,text:'Phone number detected'}); }
+  else checks.push({g:'contact',ok:false,text:'No phone number found'});
+  if(hasLinkedIn){ contactPts += 3; checks.push({g:'contact',ok:true,text:'LinkedIn profile link found'}); }
+  else checks.push({g:'contact',ok:'warn',text:'Consider adding a LinkedIn profile URL'});
+  if(hasWebsite){ contactPts += 2; checks.push({g:'contact',ok:true,text:'Portfolio/website link found'}); }
+  score += Math.min(contactPts, 15);
+
+  // === 2. SECTIONS (15 pts) ===
+  let sectionPts = 0;
+  const foundSections = [];
+  for(const [name, regex] of Object.entries(ATS_SECTIONS)){
+    if(regex.test(text)){
+      sectionPts += 3;
+      foundSections.push(name);
+      checks.push({g:'sections',ok:true,text:`"${name.charAt(0).toUpperCase()+name.slice(1)}" section detected`});
+    } else {
+      checks.push({g:'sections',ok:false,text:`No clear "${name}" section heading found`});
+    }
+  }
+  score += Math.min(sectionPts, 15);
+
+  // === 3. WORD COUNT / LENGTH (10 pts) ===
+  if(wordCount >= 200 && wordCount <= 900){
+    score += 10;
+    checks.push({g:'length',ok:true,text:`Resume length is good (${wordCount} words)`});
+  } else if(wordCount < 200){
+    score += 3;
+    checks.push({g:'length',ok:false,text:`Resume is too short (${wordCount} words) — aim for 300–700 words`});
+  } else {
+    score += 5;
+    checks.push({g:'length',ok:'warn',text:`Resume may be too long (${wordCount} words) — consider trimming to 1–2 pages`});
+  }
+
+  // === 4. QUANTIFIED ACHIEVEMENTS (10 pts) ===
+  const numberMatches = text.match(/\d+[\d,.]*\s*(%|\$|€|£|million|billion|k\b|users|clients|projects|sales|revenue|growth)/gi) || [];
+  if(numberMatches.length >= 3){
+    score += 10;
+    checks.push({g:'impact',ok:true,text:`${numberMatches.length} quantified achievements found — excellent for ATS & recruiters`});
+  } else if(numberMatches.length >= 1){
+    score += 5;
+    checks.push({g:'impact',ok:'warn',text:`Only ${numberMatches.length} quantified metric(s) found — add more numbers (%,  $, quantities)`});
+  } else {
+    checks.push({g:'impact',ok:false,text:'No quantified achievements found — add metrics like "increased revenue 25%"'});
+  }
+
+  // === 5. ACTION VERBS (10 pts) ===
+  const usedActions = [];
+  const wordsLower = words.map(w => w.toLowerCase().replace(/[^a-z]/g,''));
+  ACTION_VERBS.forEach(v => { if(wordsLower.includes(v)) usedActions.push(v); });
+  if(usedActions.length >= 5){
+    score += 10;
+    checks.push({g:'impact',ok:true,text:`${usedActions.length} strong action verbs used (${usedActions.slice(0,6).join(', ')}…)`});
+  } else if(usedActions.length >= 2){
+    score += 5;
+    checks.push({g:'impact',ok:'warn',text:`Only ${usedActions.length} action verbs — use more: "managed", "developed", "achieved"…`});
+  } else {
+    checks.push({g:'impact',ok:false,text:'Almost no action verbs — start bullet points with verbs like "Led", "Built", "Improved"'});
+  }
+
+  // === 6. BULLET POINTS (5 pts) ===
+  const bulletLines = lines.filter(l => /^\s*[•\-–—▪▸●◦*]/.test(l) || /^\s*\d+[\.\)]\s/.test(l));
+  if(bulletLines.length >= 5){
+    score += 5;
+    checks.push({g:'format',ok:true,text:`${bulletLines.length} bullet points detected — good ATS formatting`});
+  } else {
+    checks.push({g:'format',ok:false,text:'Few bullet points detected — ATS prefers bulleted lists over paragraph text'});
+  }
+
+  // === 7. FORMATTING ISSUES (5 pts) ===
+  let fmtPts = 5;
+  const hasSpecialChars = /[""''—–]/.test(text);
+  if(hasSpecialChars){
+    fmtPts -= 2;
+    checks.push({g:'format',ok:'warn',text:'Smart quotes or em-dashes found — some ATS systems misread these'});
+  }
+  const hasTables = /\t{3,}/.test(text);
+  if(hasTables){
+    fmtPts -= 2;
+    checks.push({g:'format',ok:'warn',text:'Possible table/column layout detected — ATS may scramble multi-column content'});
+  }
+  if(fmtPts >= 5){
+    checks.push({g:'format',ok:true,text:'No major formatting issues detected'});
+  }
+  score += Math.max(fmtPts, 0);
+
+  // === 8. JOB DESCRIPTION KEYWORD MATCH (30 pts) ===
+  const jd = (document.getElementById('jobDesc').value || '').trim();
+  let keywordData = null;
+  if(jd){
+    const jdWords = extractKeywords(jd);
+    const jdCounts = {};
+    jdWords.forEach(w => jdCounts[w] = (jdCounts[w]||0) + 1);
+    const topKw = Object.entries(jdCounts).sort((a,b) => b[1] - a[1]).slice(0, 20).map(e => e[0]);
+    const resumeWords = new Set(extractKeywords(text));
+    const matched = topKw.filter(w => resumeWords.has(w));
+    const missing = topKw.filter(w => !resumeWords.has(w));
+    const matchPct = topKw.length ? matched.length / topKw.length : 0;
+    score += Math.round(matchPct * 30);
+    checks.push({g:'keywords',ok: matchPct >= 0.5, text:`${Math.round(matchPct*100)}% of top job-description keywords found in your resume`});
+    keywordData = { matched, missing };
+  } else {
+    checks.push({g:'keywords',ok:'warn',text:'No job description provided — paste one above for keyword matching (worth 30 pts)'});
+  }
+
+  score = Math.min(score, 100);
+  return { score, checks, keywordData, wordCount };
+}
+
+/* ============== Render results ============== */
+function renderResults(result){
+  const { score, checks, keywordData, wordCount } = result;
+  const color = score >= 75 ? 'var(--success)' : score >= 50 ? 'var(--warn)' : 'var(--error)';
+  const label = score >= 75 ? 'Strong ATS Score' : score >= 50 ? 'Needs Improvement' : 'Weak ATS Score';
+  const tip = score >= 75
+    ? 'Your resume is well-optimized for ATS systems. Fine-tune any remaining items below.'
+    : score >= 50
+    ? 'Your resume has some ATS-friendly elements but needs work. Follow the suggestions below.'
+    : 'Your resume may be filtered out by ATS software. Address the critical issues below.';
+
+  const offset = 408 - (score / 100) * 408;
+
+  const groups = {
+    contact: { title:'Contact Information', maxPts:15 },
+    sections: { title:'Resume Sections', maxPts:15 },
+    length: { title:'Resume Length', maxPts:10 },
+    impact: { title:'Impact & Action', maxPts:20 },
+    format: { title:'Formatting', maxPts:10 },
+    keywords: { title:'Keyword Match', maxPts:30 },
+  };
+
+  let html = `
+    <div class="score-card">
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 140 140">
+          <circle class="track" cx="70" cy="70" r="65"/>
+          <circle class="fill" cx="70" cy="70" r="65" style="stroke:${color};stroke-dashoffset:${offset}"/>
+        </svg>
+        <div class="score-num" style="color:${color}">${score}<span>/100</span></div>
+      </div>
+      <div class="score-label" style="color:${color}">${label}</div>
+      <div class="score-tip">${tip}</div>
+    </div>`;
+
+  for(const [key, meta] of Object.entries(groups)){
+    const items = checks.filter(c => c.g === key);
+    if(items.length === 0) continue;
+
+    const earned = items.reduce((acc, c) => {
+      if(c.ok === true) return acc;
+      return acc;
+    }, 0);
+
+    const ptColor = items.every(c => c.ok === true) ? 'var(--success)' :
+                    items.some(c => c.ok === false) ? 'var(--error)' : 'var(--warn)';
+
+    html += `<div class="check-group">
+      <h2 class="check-group-title">
+        <span>${meta.title}</span>
+      </h2>`;
+    items.forEach(c => {
+      const cls = c.ok === true ? 'pass' : c.ok === 'warn' ? 'warn' : 'fail';
+      const icon = c.ok === true ? '✓' : c.ok === 'warn' ? '!' : '✗';
+      html += `<div class="check-item">
+        <div class="check-icon ${cls}">${icon}</div>
+        <div>${c.text}</div>
+      </div>`;
+    });
+
+    // Keyword pills
+    if(key === 'keywords' && keywordData){
+      html += `<div class="kw-section">
+        <h3 class="kw-label matched">Matched Keywords</h3>
+        <div class="kw-pills">${keywordData.matched.length ? keywordData.matched.map(w => `<span class="kw-pill matched">${w}</span>`).join('') : '<span style="font-size:12px;color:var(--text-muted)">None</span>'}</div>
+        <h3 class="kw-label missing">Missing Keywords</h3>
+        <div class="kw-pills">${keywordData.missing.length ? keywordData.missing.map(w => `<span class="kw-pill missing">${w}</span>`).join('') : '<span style="font-size:12px;color:var(--text-muted)">None — great!</span>'}</div>
+      </div>`;
+    }
+
+    html += '</div>';
+  }
+
+  html += `<div style="text-align:center">
+    <button class="btn-rescan" onclick="resetScanner()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Scan Another Resume
+    </button>
+  </div>`;
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = html;
+  resultsEl.classList.add('show');
+
+  // Animate score ring
+  requestAnimationFrame(() => {
+    const fill = resultsEl.querySelector('.fill');
+    if(fill) fill.style.strokeDashoffset = offset;
+  });
+}
+
+function resetScanner(){
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('upload-section').style.display = '';
+  document.getElementById('jd-section').style.display = '';
+  fileInput.value = '';
+}
+
+/* ============== Main flow ============== */
+async function handleFile(file){
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['pdf','docx'].includes(ext)){
+    alert('Please upload a PDF or DOCX file.');
+    return;
+  }
+
+  // Show scanner
+  showScanner();
+  setScanProgress(0, 'Initializing scanner…', `Reading ${file.name}`);
+
+  await delay(400);
+  setScanProgress(10, 'Reading document…', `Extracting text from ${file.name}`);
+  await delay(300);
+
+  let text;
+  try {
+    text = await extractText(file);
+  } catch(err){
+    hideScanner();
+    alert('Error reading file: ' + (err.message || err));
+    return;
+  }
+
+  setScanProgress(30, 'Parsing content…', `Found ${text.split(/\s+/).length} words`);
+  await delay(500);
+
+  setScanProgress(45, 'Checking contact information…', 'Looking for email, phone, LinkedIn');
+  await delay(400);
+
+  setScanProgress(55, 'Analyzing resume sections…', 'Detecting headings: Experience, Education, Skills');
+  await delay(400);
+
+  setScanProgress(70, 'Evaluating impact statements…', 'Scanning for metrics and action verbs');
+  await delay(400);
+
+  setScanProgress(82, 'Reviewing formatting…', 'Checking for ATS-friendly structure');
+  await delay(350);
+
+  const jd = document.getElementById('jobDesc').value.trim();
+  if(jd){
+    setScanProgress(90, 'Matching keywords…', 'Comparing resume against job description');
+    await delay(400);
+  }
+
+  setScanProgress(95, 'Generating report…', 'Compiling results');
+  await delay(300);
+
+  // Run analysis
+  const result = analyzeResume(text);
+
+  setScanProgress(100, 'Scan complete!', `ATS Score: ${result.score}/100`);
+  await delay(600);
+
+  hideScanner();
+
+  // Hide upload area, show results
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('jd-section').style.display = 'none';
+  renderResults(result);
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============== Drawer ============== */
+const menuToggle = document.getElementById('menu-toggle');
+const menuDrawer = document.getElementById('menu-drawer');
+const menuOverlay = document.getElementById('menu-overlay');
+const drawerClose = document.getElementById('drawer-close');
+
+function openDrawer(){ menuDrawer.classList.add('open'); menuOverlay.classList.add('open'); }
+function closeDrawer(){ menuDrawer.classList.remove('open'); menuOverlay.classList.remove('open'); }
+
+menuToggle.addEventListener('click', openDrawer);
+drawerClose.addEventListener('click', closeDrawer);
+menuOverlay.addEventListener('click', closeDrawer);
+
+const triggers = document.querySelectorAll('.menu-trigger');
+triggers.forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const targetId = trigger.getAttribute('data-accordion');
+    const submenu = document.getElementById(targetId);
+    const isOpen = submenu.classList.contains('open');
+    document.querySelectorAll('.menu-submenu').forEach(sub => sub.classList.remove('open'));
+    document.querySelectorAll('.menu-trigger').forEach(trig => trig.classList.remove('active'));
+    if(!isOpen){ trigger.classList.add('active'); submenu.classList.add('open'); }
+  });
+});
+</script>
+</body>
+</html>
