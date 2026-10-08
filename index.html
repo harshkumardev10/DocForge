@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="DocForge — free browser-based productivity suite. Create invoices, build ATS-friendly resumes, scan ATS compatibility, run PDF tools (merge, split, rotate, compress), and edit images (background removal, enhance, color adjustments).">
-<meta name="keywords" content="invoice generator, resume builder, ATS resume checker, PDF tools, merge PDF, split PDF, compress PDF, image background remover, enhance image, color adjust, crop image, browser tools">
+<meta name="description" content="DocForge — free browser-based productivity suite. Build ATS-friendly resumes, scan ATS compatibility, and run PDF tools (merge, split, compress, convert, rotate, watermark, and protect).">
+<meta name="keywords" content="resume builder, ATS resume checker, ATS resume scanner, PDF tools, merge PDF, split PDF, compress PDF, PDF to Word, Word to PDF, browser tools">
 <meta name="color-scheme" content="light dark">
 <meta name="google-site-verification" content="6GbxokTcffQ1pNCIp4YUn143TZA9c7D4YZJ3NDhOcOQ" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<title>DocForge — Invoice, Resume, PDF & Image Tools</title>
+<title>DocForge — Resume &amp; PDF Tools</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -369,29 +369,12 @@ body{
         <span class="wm-doc">Doc</span><span class="wm-forge">Forge</span>
       </div>
     </a>
-    <button id="drawer-close" class="icon-btn" aria-label="Close menu">&times;</button>
+    <button id="drawer-close" class="icon-btn" aria-label="Close menu">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
   </div>
   
   <div class="drawer-menu">
-    <!-- Invoice Accordion -->
-    <div class="menu-item-group">
-      <button class="menu-trigger" data-accordion="invoices-sub">
-        <span style="display:flex;align-items:center;gap:10px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
-          Invoices
-        </span>
-        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      </button>
-      <div id="invoices-sub" class="menu-submenu">
-        <a href="invoice.html?type=classic" class="submenu-link">Classic Invoice</a>
-        <a href="invoice.html?type=modern" class="submenu-link">Modern Invoice</a>
-        <a href="invoice.html?type=minimal" class="submenu-link">Minimal Invoice</a>
-        <a href="invoice.html?type=service" class="submenu-link">Service Invoice</a>
-        <a href="invoice.html?type=freelancer" class="submenu-link">Freelancer Invoice</a>
-        <a href="#invoices" class="submenu-link scroll-link main-link" data-target="invoices">View All Invoices →</a>
-      </div>
-    </div>
-
     <!-- Resume Accordion -->
     <div class="menu-item-group">
       <button class="menu-trigger" data-accordion="resumes-sub">
@@ -406,6 +389,7 @@ body{
         <a href="resume.html?theme=modern" class="submenu-link">Modern Resume</a>
         <a href="resume.html?theme=minimal" class="submenu-link">Minimal Resume</a>
         <a href="resume.html?theme=ats" class="submenu-link">ATS-Friendly Resume</a>
+        <a href="resume.html?theme=fresher" class="submenu-link">Fresher Resume</a>
         <a href="ats-scanner.html" class="submenu-link">🔍 ATS Resume Scanner</a>
         <a href="#resumes" class="submenu-link scroll-link main-link" data-target="resumes">View All Resumes →</a>
       </div>
@@ -436,24 +420,6 @@ body{
         <a href="#pdfs" class="submenu-link scroll-link main-link" data-target="pdfs">View All PDF Tools →</a>
       </div>
     </div>
-
-    <!-- Image Accordion -->
-    <div class="menu-item-group">
-      <button class="menu-trigger" data-accordion="images-sub">
-        <span style="display:flex;align-items:center;gap:10px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          Images
-        </span>
-        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      </button>
-      <div id="images-sub" class="menu-submenu">
-        <a href="image-tools.html?tool=bg-remove" class="submenu-link">Remove Background</a>
-        <a href="image-tools.html?tool=enhance" class="submenu-link">Enhance Quality</a>
-        <a href="image-tools.html?tool=adjust" class="submenu-link">Adjust Color &amp; Brightness</a>
-        <a href="image-tools.html?tool=crop-rotate" class="submenu-link">Crop &amp; Rotate</a>
-        <a href="#images" class="submenu-link scroll-link main-link" data-target="images">View All Image Tools →</a>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -461,51 +427,9 @@ body{
 <main>
 <div class="hero">
   <div class="hero-content">
-    <h1>Invoice, Resume & PDF Tools</h1>
-    <p>A suite of clean, professional tools to design beautiful invoices, draft ATS-friendly resumes, and merge, split, or convert PDF files.</p>
+    <h1>Resume &amp; PDF Tools</h1>
+    <p>A suite of clean, professional tools to draft ATS-friendly resumes, scan ATS compatibility, and merge, split, compress, or convert PDF files.</p>
   </div>
-</div>
-
-<div class="section" id="invoices">
-  <h2 class="section-title">Invoices</h2>
-  <div class="grid" data-grid="invoices">
-    <a class="card" href="invoice.html?type=classic" data-search="classic invoice bold blue header bill ship shipping">
-      <div class="card-swatch" style="background:#1a56db">CLASSIC</div>
-      <div class="card-body">
-        <div class="card-name">Classic Invoice</div>
-        <div class="card-desc">Bold blue header, full Bill/Ship To and shipping bar. Best general-purpose layout.</div>
-      </div>
-    </a>
-    <a class="card" href="invoice.html?type=modern" data-search="modern invoice dark slate teal poppins">
-      <div class="card-swatch" style="background:#0f172a">MODERN</div>
-      <div class="card-body">
-        <div class="card-name">Modern Invoice</div>
-        <div class="card-desc">Dark slate header with a teal accent and Poppins typography for a contemporary brand feel.</div>
-      </div>
-    </a>
-    <a class="card" href="invoice.html?type=minimal" data-search="minimal invoice black white print">
-      <div class="card-swatch" style="background:#111827">MINIMAL</div>
-      <div class="card-body">
-        <div class="card-name">Minimal Invoice</div>
-        <div class="card-desc">Black & white, thin rules, no color blocks — clean and print-friendly.</div>
-      </div>
-    </a>
-    <a class="card" href="invoice.html?type=service" data-search="service invoice violet rate billing">
-      <div class="card-swatch" style="background:#7c3aed">SERVICE</div>
-      <div class="card-body">
-        <div class="card-name">Service Invoice</div>
-        <div class="card-desc">Violet theme tuned for billing services — "Rate" column and service-rendered framing.</div>
-      </div>
-    </a>
-    <a class="card" href="invoice.html?type=freelancer" data-search="freelancer invoice green solo bill to">
-      <div class="card-swatch" style="background:#15803d">FREELANCE</div>
-      <div class="card-body">
-        <div class="card-name">Freelancer Invoice</div>
-        <div class="card-desc">Green accent, simplified single Bill-To (no Ship To/shipping bar) for solo freelance work.</div>
-      </div>
-    </a>
-  </div>
-  <div class="empty-state" data-empty="invoices">No invoice templates match your search.</div>
 </div>
 
 <div class="section" id="resumes">
@@ -537,6 +461,13 @@ body{
       <div class="card-body">
         <div class="card-name">ATS-Friendly Resume</div>
         <div class="card-desc">Plain black & white, single column, centered header — built to pass resume-screening software. Includes a built-in ATS score checker.</div>
+      </div>
+    </a>
+    <a class="card" href="resume.html?theme=fresher" data-search="fresher resume photo table education career objective college student graduate">
+      <div class="card-swatch" style="background:#0284c7">FRESHER</div>
+      <div class="card-body">
+        <div class="card-name">Fresher Resume</div>
+        <div class="card-desc">Designed for graduates and college students with profile photo, 5-column education table, skill chips, and personal details.</div>
       </div>
     </a>
     <a class="card" href="ats-scanner.html" data-search="ats scanner scan check parse resume grading checker score upload pdf docx">
@@ -640,41 +571,6 @@ body{
   </div>
   <div class="empty-state" data-empty="pdfs">No PDF tools match your search.</div>
 </div>
-
-<div class="section" id="images">
-  <h2 class="section-title">Image Tools</h2>
-  <div class="grid" data-grid="images">
-    <a class="card" href="image-tools.html?tool=bg-remove" data-search="background remove transparent key chroma back backdrop clear cut transparent">
-      <div class="card-swatch" style="background:#4f46e5">BG REMOVE</div>
-      <div class="card-body">
-        <div class="card-name">Remove Background</div>
-        <div class="card-desc">Automatically make backgrounds transparent. Ideal for logos, products, and profile pics.</div>
-      </div>
-    </a>
-    <a class="card" href="image-tools.html?tool=enhance" data-search="enhance enhance image quality sharpen scale filter balance contrast stretch crisp clear pixel">
-      <div class="card-swatch" style="background:#0891b2">ENHANCE</div>
-      <div class="card-body">
-        <div class="card-name">Enhance Quality</div>
-        <div class="card-desc">Sharpen details, stretch contrast, auto-balance colors, and de-noise to improve pixel clarity.</div>
-      </div>
-    </a>
-    <a class="card" href="image-tools.html?tool=adjust" data-search="adjust colors brightness contrast saturation hue rotate sepia grayscale photo filters presets">
-      <div class="card-swatch" style="background:#0f766e">ADJUST</div>
-      <div class="card-body">
-        <div class="card-name">Adjust Color &amp; Brightness</div>
-        <div class="card-desc">Finely tune lighting, colors, saturation, filters, grayscale, sepia, and blur.</div>
-      </div>
-    </a>
-    <a class="card" href="image-tools.html?tool=crop-rotate" data-search="crop rotate flip horizontal vertical square crop 16:9 ratio resize trim spin">
-      <div class="card-swatch" style="background:#7c3aed">CROP &amp; ROTATE</div>
-      <div class="card-body">
-        <div class="card-name">Crop &amp; Rotate</div>
-        <div class="card-desc">Trim image boundaries to preset ratios, flip, and rotate images up to 360 degrees.</div>
-      </div>
-    </a>
-  </div>
-  <div class="empty-state" data-empty="images">No image tools match your search.</div>
-</div>
 </main>
 
 <footer style="text-align:center; padding:24px; font-size:12px; color:var(--text-muted); border-top:1px solid var(--border-color); background:var(--bg-surface); margin-top:40px;">
@@ -763,10 +659,10 @@ scrollLinks.forEach(link => {
 });
 
 /* Highlight nav link on scroll */
-const sections = ['invoices','resumes','pdfs','images'].map(id => document.getElementById(id));
+const sections = ['resumes','pdfs'].map(id => document.getElementById(id));
 const io = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    if(entry.isIntersecting){
+    if(entry.isIntersecting && typeof setActiveLink === 'function'){
       setActiveLink(entry.target.id);
     }
   });
